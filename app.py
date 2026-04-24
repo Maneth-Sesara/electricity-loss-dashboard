@@ -17,17 +17,25 @@ Higher electricity losses may indicate infrastructure inefficiency, while lower 
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv("data/cleaned_electricity_losses.csv")
+    df = pd.read_csv("cleaned_electricity_losses.csv")
 
     if "Unnamed: 0" in df.columns:
         df = df.drop(columns=["Unnamed: 0"])
 
-    meta = pd.read_csv("data/Metadata_Country_API_EG.ELC.LOSS.ZS_DS2_en_csv_v2_3166.csv")
+    meta = pd.read_csv("Metadata_Country_API_EG.ELC.LOSS.ZS_DS2_en_csv_v2_3166.csv")
 
     meta = meta[["Country Code", "Region"]]
 
     df = df.merge(meta, left_on="Country_Code", right_on="Country Code", how="left")
 
+    # keep only actual countries
+    df = df[df["Region"].notna()]
+
+    df = df.drop(columns=["Country Code", "Region"])
+
+    df = df.dropna(subset=["Country", "Country_Code", "Year", "Electricity_Loss_Percentage"])
+
+    return df
     # keep only actual countries
     df = df[df["Region"].notna()]
 
